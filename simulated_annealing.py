@@ -8,15 +8,15 @@ import matplotlib.pyplot as plt
 class Simulated_annealing:
     
     '''
-    Handles simulation of queueing system.
+    Simulated annealing process to minimise charge arrangement
 
-    1. Generate charge arrangement
-    2. propose new position for 1 charge
-    3. determine favorability of new position
-    4. If more favourable update,
+    1. Generate charge arrangement - charge_arrangement_initial
+    2. propose new position for 1 charge - step
+    3. determine favorability of new position - arrangement_energy_func (needs serious work)
+    4. If more favourable update else determine likelihood using annealing temp - annealing_func,update
     '''
     
-    def __init__(self,number_charges,max_stepsize,a):
+    def __init__(self,number_charges,max_stepsize,decay_speed):
         '''
         Description
         -----------
@@ -28,7 +28,7 @@ class Simulated_annealing:
 
         self.n = number_charges
         self.max_stepsize = max_stepsize
-        self.a = a
+        self.decay_speed = decay_speed
 
     def charge_arrangement_initial(self):
         # initilize initial charge configuration
@@ -58,6 +58,15 @@ class Simulated_annealing:
         proposed  = (current[0] + step_r*math.sin(theta),current[1] + step_r*math.cos(theta))
         return proposed
     
+    def arrangement_energy(self):
+        # determine liklihood of move using energy and force
+        # calculate energy across total arrangement?
+        return 0.5
+    
+    def annealing_func(self,t):
+        # annealing function for temperature decay
+        return np.exp(-self.decay_speed^t)
+    
     def update(self,temp,current,proposed,prob):
         # determine whether system is updated
         if prob >=1:
@@ -68,15 +77,6 @@ class Simulated_annealing:
             return
         else:
             return current
-
-    def annealing_func(a,t):
-        # annealing function for temperature decay
-        return np.exp(-a^t)
-    
-    def arrangement_energy(self):
-        # determine liklihood of move using energy and force
-        # calculate energy across total arrangement?
-        return 0.5
 
     def run(self):
         # initilize time
@@ -102,7 +102,7 @@ class Simulated_annealing:
             # update chain
             x_new = self.update(temp,x_current,x_proposed,likelihood)
             coords[charge] = x_new
-            
+
 
 
         
