@@ -12,9 +12,9 @@ class SimulatedAnnealing:
 
     1. Generate charge arrangement - charge_arrangement_initial
     2. propose new position for 1 charge - step
-    3. determine favorability of new position - arrangement_energy_func (needs serious work)
-    4. If more favourable update else determine likelihood using annealing temp - annealing_func,update
-    %. repeat while annealing temp large...
+    3. determine favorability of new position - force on particle due to other nearby charges - acting_force
+    4. If more favourable update else use annealing temp - annealing_func,update
+    5. repeat while annealing temp large...
     '''
     
     def __init__(self,number_charges,max_stepsize,decay_speed,dt):
@@ -68,22 +68,23 @@ class SimulatedAnnealing:
 
         return proposed
     
-    def arrangement_energy(self,coords,x_current,x_proposed):
-        # determine liklihood of move using energy and force
-        # calculate energy across total arrangement?
+    def acting_force(self,coords,x_current,x_proposed):
+        # Calculate force on particle in consideration
+        # if force on particle is lower in new location the likelihood > 1
 
         x_ij = np.array([(np.array(x_current[0]) - np.array(coords[j][0])) for j in range(self.n) if coords[j] not in [x_current]])
         y_ij = np.array([(np.array(x_current[1]) - np.array(coords[j][1])) for j in range(self.n) if coords[j] not in [x_current]])
-        abs_r = np.sqrt((x_ij**2+y_ij**2))
-        current_force = 1/sum(abs_r**2)
+        # not sure this is right
+        net_force_x = sum(x_ij/np.abs(x_ij)**3)
+        net_force_y = sum(y_ij/np.abs(y_ij)**3)
+        current_force = (net_force_x**2+net_force_y**2)**(1/2)
 
         x_ij = np.array([(np.array(x_proposed[0]) - np.array(coords[j][0])) for j in range(self.n) if coords[j] not in [x_current]])
         y_ij = np.array([(np.array(x_proposed[1]) - np.array(coords[j][1])) for j in range(self.n) if coords[j] not in [x_current]])
-        abs_r = np.sqrt((x_ij**2+y_ij**2))
-        abs_r = np.sqrt((x_ij**2+y_ij**2))
-        proposed_force= 1/sum(abs_r**2)
+        net_force_x = sum(x_ij/np.abs(x_ij)**3)
+        net_force_y = sum(y_ij/np.abs(y_ij)**3)
+        proposed_force = (net_force_x**2+net_force_y**2)**(1/2)
 
-        # positive force is repulsive
         # smaller force is more favourable so should be curr/prop
         likelihood = current_force/proposed_force
         # print(likelihood)
@@ -102,14 +103,20 @@ class SimulatedAnnealing:
             return current
         
     def calc_energy(self,coords):
+        # Energy is the sum of individual forces in the case where all charges = +1 - not really true but close enough for now...
         individual_forces =[]
         for i in range(self.n):
             x = coords[i]
             x_ij = np.array([(np.array(x[0]) - np.array(coords[j][0])) for j in range(self.n) if coords[j] not in [x]])
             y_ij = np.array([(np.array(x[1]) - np.array(coords[j][1])) for j in range(self.n) if coords[j] not in [x]])
-            abs_r = np.sqrt((x_ij**2+y_ij**2))
-            force = 1/sum(abs_r**2)
-            individual_forces.append(force)
+            net_force_x = sum(x_ij/np.abs(x_ij)**3)
+            net_force_y = sum(y_ij/np.abs(y_ij)**3)
+            net_force = (net_force_x**2+net_force_y**2)**(1/2)
+
+            # direction is not important as all forces are repulsive
+            individual_forces.append(net_force)
+
+        # as all charges are equal energy = sum |force|
         energy = sum(individual_forces)
 
         return energy
@@ -137,7 +144,7 @@ class SimulatedAnnealing:
 
             # determine potential location
             x_proposed = self.step(x_current)
-            likelihood = self.arrangement_energy(coords,x_current,x_proposed)
+            likelihood = self.acting_force(coords,x_current,x_proposed)
             # update chain
             x_new = self.update(temp,x_current,x_proposed,likelihood)
             coords[charge] = x_new
