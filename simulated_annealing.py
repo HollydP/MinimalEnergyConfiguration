@@ -74,16 +74,16 @@ class SimulatedAnnealing:
 
         x_ij = np.array([(np.array(x_current[0]) - np.array(coords[j][0])) for j in range(self.n) if coords[j] not in [x_current]])
         y_ij = np.array([(np.array(x_current[1]) - np.array(coords[j][1])) for j in range(self.n) if coords[j] not in [x_current]])
-        abs_r = np.sqrt((x_ij**2+y_ij**2))
-        # direction is not important as all forces are repulsive
-        current_force = 1/sum(abs_r**2)
+        # not sure this is right
+        net_force_x = sum(x_ij/np.abs(x_ij)**3)
+        net_force_y = sum(y_ij/np.abs(y_ij)**3)
+        current_force = (net_force_x**2+net_force_y**2)**(1/2)
 
         x_ij = np.array([(np.array(x_proposed[0]) - np.array(coords[j][0])) for j in range(self.n) if coords[j] not in [x_current]])
         y_ij = np.array([(np.array(x_proposed[1]) - np.array(coords[j][1])) for j in range(self.n) if coords[j] not in [x_current]])
-        abs_r = np.sqrt((x_ij**2+y_ij**2))
-        abs_r = np.sqrt((x_ij**2+y_ij**2))
-        # direction is not important as all forces are repulsive
-        proposed_force= 1/sum(abs_r**2)
+        net_force_x = sum(x_ij/np.abs(x_ij)**3)
+        net_force_y = sum(y_ij/np.abs(y_ij)**3)
+        proposed_force = (net_force_x**2+net_force_y**2)**(1/2)
 
         # smaller force is more favourable so should be curr/prop
         likelihood = current_force/proposed_force
@@ -109,11 +109,12 @@ class SimulatedAnnealing:
             x = coords[i]
             x_ij = np.array([(np.array(x[0]) - np.array(coords[j][0])) for j in range(self.n) if coords[j] not in [x]])
             y_ij = np.array([(np.array(x[1]) - np.array(coords[j][1])) for j in range(self.n) if coords[j] not in [x]])
-            abs_r = np.sqrt((x_ij**2+y_ij**2))
+            net_force_x = sum(x_ij/np.abs(x_ij)**3)
+            net_force_y = sum(y_ij/np.abs(y_ij)**3)
+            net_force = (net_force_x**2+net_force_y**2)**(1/2)
 
             # direction is not important as all forces are repulsive
-            force = 1/sum(abs_r**2)
-            individual_forces.append(force)
+            individual_forces.append(net_force)
 
         # as all charges are equal energy = sum |force|
         energy = sum(individual_forces)
