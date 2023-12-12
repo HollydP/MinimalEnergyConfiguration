@@ -37,7 +37,7 @@ class ChargeCollection:
             return sys.maxsize
         return E / 2 # because each contribution was counted twice
     
-    def plot_charges(self):
+    def plot_charges(self,random_charges=[]):
         """
         Plots current charge configuration.
         """
@@ -49,6 +49,10 @@ class ChargeCollection:
         plt.plot(x, y, label='boundary')
         plt.Circle((0,0), 1, edgecolor='b')
         plt.plot(x_coords, y_coords, "o")
+        if len(random_charges) > 0 :
+            x_initial = [coord[0] for coord in random_charges]
+            y_initial = [coord[1] for coord in random_charges]
+            plt.plot(x_initial, y_initial, "o",c = 'grey')
         plt.show()
     
     def change_charge_position(self, charge, x_step, y_step):

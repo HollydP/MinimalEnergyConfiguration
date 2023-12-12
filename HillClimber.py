@@ -5,13 +5,13 @@ from charge_collection import ChargeCollection
 
 class HillClimber:
 
-    def __init__(self, charges):
+    def __init__(self, charges, max_stepsize):
         if not charges.is_solution():
             raise Exception("HillClimber requires a valid configuration")
         
         self.charges = copy.deepcopy(charges)
         self.energy = charges.get_total_energy()
-        self.max_stepsize = 0.7
+        self.max_stepsize = max_stepsize
 
     def mutate_configuration(self, new_configuration):
         """
@@ -38,6 +38,8 @@ class HillClimber:
         Runs the hillclimber algorithm for a specific amount of iterations.
         """
         self.iterations = iterations
+        try:    print("Initial Temp: ",self.T, "Initial Energy: ", self.energy)
+        except NameError: pass
 
         for iteration in range(iterations):
             # Nice trick to only print if variable is set to True
@@ -49,7 +51,11 @@ class HillClimber:
             self.mutate_configuration(new_configuration)
 
             # Accept it if new configuration is better
-            self.check_solution(new_configuration, iteration)    
+            self.check_solution(new_configuration, iteration)
+
+        try:    print("Final Temp: ",self.T)
+        except NameError: pass
+
 
 class SimulatedAnnealing(HillClimber):
     """
@@ -60,20 +66,21 @@ class SimulatedAnnealing(HillClimber):
     Most of the functions are similar to those of the HillClimber class, which is why
     we use that as a parent class.
     """
-    def __init__(self, charges, temperature=5000):
+    def __init__(self, charges, max_stepsize, cooling_rate = 1e-3 ,temperature=5000):
         # Use the init of the Hillclimber class
-        super().__init__(charges)
+        super().__init__(charges,max_stepsize)
 
         # Starting temperature and current temperature
         self.T0 = temperature
         self.T = temperature
+        self.cooling_schedule = (1-cooling_rate)
 
     def update_temperature(self):
         """
         This function implements a exponential cooling scheme.
         Same one used in the article on canvas.
         """
-        self.T = self.T * 0.9 #- (self.T0 / self.iterations / 1100)
+        self.T = self.T * self.cooling_schedule #- (self.T0 / self.iterations / 1100)
 
     def check_solution(self, new_configuration, iteration):
         """
@@ -96,12 +103,14 @@ class SimulatedAnnealing(HillClimber):
         if iteration % 1100 == 0:
             self.update_temperature()
             self.max_stepsize *= 0.99
+        # self.update_temperature()
+
 
 
 if __name__=="__main__":
     N = 11
     random_charges = ChargeCollection(N)
-    random_charges.plot_charges()
+    # random_charges.plot_charges()
 
     # hillclimber = HillClimber(random_charges)
     # hillclimber.run(iterations=100000, verbose=True)
@@ -110,4 +119,4 @@ if __name__=="__main__":
 
     simulated_annealing = SimulatedAnnealing(random_charges)
     simulated_annealing.run(iterations=150000, verbose=True)
-    simulated_annealing.charges.plot_charges()
+    simulated_annealing.charges.plot_charges(random_charges)
