@@ -37,7 +37,7 @@ class ChargeCollection:
             return sys.maxsize
         return E / 2 # because each contribution was counted twice
     
-    def plot_charges(self):
+    def plot_charges(self,random_charges=[]):
         """
         Plots current charge configuration.
         """

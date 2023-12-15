@@ -7,13 +7,13 @@ import numpy as np
 
 class HillClimber:
 
-    def __init__(self, charges):
+    def __init__(self, charges, max_stepsize):
         if not charges.is_solution():
             raise Exception("HillClimber requires a valid configuration")
         
         self.charges = copy.deepcopy(charges)
         self.energy = charges.get_total_energy()
-        self.max_stepsize = 0.7
+        self.max_stepsize = max_stepsize
         self.energy_arr = None 
         self.T_arr = None
 
@@ -105,20 +105,21 @@ class SimulatedAnnealing(HillClimber):
     Most of the functions are similar to those of the HillClimber class, which is why
     we use that as a parent class.
     """
-    def __init__(self, charges, temperature=750):
+    def __init__(self, charges, max_stepsize, cooling_rate = 1e-3 ,temperature=5000):
         # Use the init of the Hillclimber class
-        super().__init__(charges)
+        super().__init__(charges,max_stepsize)
 
         # Starting temperature and current temperature
         self.T0 = temperature
         self.T = temperature
+        self.cooling_schedule = (1-cooling_rate)
 
     def update_temperature(self):
         """
         This function implements a exponential cooling scheme.
         Same one used in the article on canvas.
         """
-        self.T = self.T * 0.95 #- (self.T0 / self.iterations / 1100)
+        self.T = self.T * self.cooling_schedule #- (self.T0 / self.iterations / 1100)
 
     def check_solution(self, new_configuration, iteration):
         """
@@ -149,7 +150,7 @@ if __name__=="__main__":
     N = 11
     # N = 10
     random_charges = ChargeCollection(N)
-    random_charges.plot_charges()
+    # random_charges.plot_charges()
 
     hillclimber = HillClimber(random_charges)
     hillclimber.run(iterations=10, verbose=True, animate=True, save=True)
