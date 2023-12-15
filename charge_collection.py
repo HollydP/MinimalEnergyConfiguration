@@ -47,16 +47,22 @@ class ChargeCollection:
         theta = np.linspace(0, 2*np.pi, 100)
         x, y = np.cos(theta), np.sin(theta)
         plt.plot(x, y, label='boundary')
-        plt.Circle((0,0), 1, edgecolor='b')
-        plt.plot(x_coords, y_coords, "o")
+        plt.plot(x_coords, y_coords, "ko")
         plt.show()
     
     def change_charge_position(self, charge, x_step, y_step):
         """"
         Changes the position of a charge in the configuration.
         """
-        self.charges[charge][0] += x_step
-        self.charges[charge][1] += y_step 
+        new_x = self.charges[charge][0] + x_step
+        new_y = self.charges[charge][1] + y_step 
+
+        # place on border if step pushes charge out of bounds
+        while np.sqrt(new_x**2 + new_y**2) > 1:
+            new_x = new_x - 0.005 if new_x > 0 else new_x + 0.005
+            new_y = new_y - 0.005 if new_y > 0 else new_y + 0.005
+            
+        self.charges[charge][0], self.charges[charge][1] = new_x, new_y
 
     def is_solution(self):
         """"
