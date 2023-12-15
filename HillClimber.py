@@ -71,6 +71,14 @@ class HillClimber:
                 # Save energy state
                 self.energy_arr[iteration * self.charges.N + charge_index] = self.energy if save else None
                 self.T_arr[iteration * self.charges.N + charge_index] = self.T if self.T and save else None
+            
+            # Update the temperature 
+            if (iteration % 100 == 0) & (self.T is not None):
+                print(iteration)
+                self.update_temperature()
+            # if self.T < 0.01:
+            #     self.max_stepsize = 0.1
+            #     # self.max_stepsize *= 0.9
 
             if animate:
                 plt.clf()
@@ -82,7 +90,7 @@ class HillClimber:
         # save to csv
         if save:
             T0 = self.T0 if self.T else "no_temp"
-            self.save_results(title=f"{iteration + 1}_iters_max_step_{self.max_stepsize}_T0_{T0}")
+            self.save_results(title=f"{iteration + 1}_N_{self.charges.N}_iters_max_step_{self.max_stepsize}_T0_{T0}_cooling_{'linear'}")
 
         # return best solution found
         return self.charges     
@@ -114,12 +122,16 @@ class SimulatedAnnealing(HillClimber):
         self.T = temperature
         self.cooling_schedule = (1-cooling_rate)
 
-    def update_temperature(self):
+    def update_temperature(self,linear=False):
         """
         This function implements a exponential cooling scheme.
         Same one used in the article on canvas.
         """
-        self.T = self.T * self.cooling_schedule #- (self.T0 / self.iterations / 1100)
+         #- (self.T0 / self.iterations / 1100)
+        if linear==True:
+             self.T = self.T - (self.T0*100  / (self.iterations+1))
+        else:
+            self.T = self.T * self.cooling_schedule
 
     def check_solution(self, new_configuration, iteration):
         """
@@ -137,13 +149,6 @@ class SimulatedAnnealing(HillClimber):
         if  delta < 0 or random.random() < math.exp(- delta / self.T):
             self.charges = new_configuration
             self.energy = new_energy
-
-        # Update the temperature 
-        if iteration % 100 == 0:
-            self.update_temperature()
-        if self.T < 0.01:
-            self.max_stepsize = 0.1
-            # self.max_stepsize *= 0.9
 
 
 if __name__=="__main__":
