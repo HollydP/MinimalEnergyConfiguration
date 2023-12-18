@@ -17,27 +17,30 @@ from HillClimber import SimulatedAnnealing
 from HillClimber import HillClimber
 
 
-def run_simulated_annealing(plot=True, save=False):
+def run_simulated_annealing(iterations=5000, plot=False, save=False, verbose=False):
     '''
     Runs one simulated annealing run.
     '''
-    N = 11      # = number of charges
+    N = 16      # = number of charges
     c = 0.9     # = cooling rate (taken from paper)
 
     # Create charge collection:
     random_charges = ChargeCollection(N-1)  # N-1 because we add a charge at (0,0) during iterations (TODO: change this)
-    simulated_annealing = SimulatedAnnealing(random_charges, max_stepsize=0.5, cooling_rate=c)
-    simulated_annealing.run(iterations=5000,verbose=True, animate=False, save=save)
+    simulated_annealing = SimulatedAnnealing(random_charges, max_stepsize=1.0, cooling_rate=c)
+    simulated_annealing.run(iterations=iterations, verbose=verbose, animate=False, save=save)
 
-    simulated_annealing.charges.plot_charges(random_charges)
-    plt.axis('off')
-    # plt.savefig('N{} I{} c{}.png'.format(N,5000,c))  # TODO: change this
-    plt.show()
+    if plot:
+        simulated_annealing.charges.plot_charges(random_charges)
+    
+    return simulated_annealing.energy
 
 
 def main():
     '''Main function'''
-    run_simulated_annealing()
+    iterations = 10_000
+    min_energy = run_simulated_annealing(iterations=iterations, plot=True, verbose=True)
+    print('')
+    print(f"E_min = {min_energy} ({iterations} iterations)")
 
 
 if __name__ == '__main__':

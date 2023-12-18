@@ -7,7 +7,7 @@ import numpy as np
 
 class HillClimber:
 
-    def __init__(self, charges, max_stepsize):
+    def __init__(self, charges:ChargeCollection, max_stepsize):
         if not charges.is_solution():
             raise Exception("HillClimber requires a valid configuration")
         
@@ -113,7 +113,7 @@ class SimulatedAnnealing(HillClimber):
     Most of the functions are similar to those of the HillClimber class, which is why
     we use that as a parent class.
     """
-    def __init__(self, charges, max_stepsize, cooling_rate = 1e-3 ,temperature=5000):
+    def __init__(self, charges:ChargeCollection, max_stepsize, cooling_rate = 1e-3 ,temperature=5000):
         # Use the init of the Hillclimber class
         super().__init__(charges,max_stepsize)
 
@@ -133,7 +133,7 @@ class SimulatedAnnealing(HillClimber):
         else:
             self.T = self.T * self.cooling_schedule
 
-    def check_solution(self, new_configuration, iteration):
+    def check_solution(self, new_configuration:ChargeCollection, iteration):
         """
         Checks and accepts better solutions than the current solution.
         Sometimes accepts solutions that are worse, depending on the current
