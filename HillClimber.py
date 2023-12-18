@@ -41,8 +41,8 @@ class HillClimber:
         Runs the hillclimber algorithm for a specific amount of iterations.
         """
         self.iterations = iterations
-        self.energy_arr = np.zeros(iterations * self.charges.N)
-        self.T_arr = np.zeros(iterations * self.charges.N)
+        self.energy_arr = np.zeros(iterations)
+        self.T_arr = np.zeros(iterations)
 
         try:
             self.T 
@@ -68,13 +68,13 @@ class HillClimber:
                 # Accept it if new configuration is better
                 self.check_solution(new_configuration, iteration)    
 
-                # Save energy state
-                self.energy_arr[iteration * self.charges.N + charge_index] = self.energy if save else None
-                self.T_arr[iteration * self.charges.N + charge_index] = self.T if self.T and save else None
+            # Save energy state
+            self.energy_arr[iteration] = self.energy if save else None
+            self.T_arr[iteration] = self.T if self.T and save else None
             
             # Update the temperature 
             if (iteration % 100 == 0) & (self.T is not None):
-                print(iteration)
+                # print(iteration)
                 self.update_temperature()
             # if self.T < 0.01:
             #     self.max_stepsize = 0.1
@@ -90,7 +90,7 @@ class HillClimber:
         # save to csv
         if save:
             T0 = self.T0 if self.T else "no_temp"
-            self.save_results(title=f"{iteration + 1}_N_{self.charges.N}_iters_max_step_{self.max_stepsize}_T0_{T0}_cooling_{'linear'}")
+            self.save_results(title=f"{iteration + 1}_N_{self.charges.N}_iters_max_step_{self.max_stepsize}_T0_{T0}_cooling_{self.cooling_schedule}")
 
         # return best solution found
         return self.charges     
@@ -152,16 +152,16 @@ class SimulatedAnnealing(HillClimber):
 
 
 if __name__=="__main__":
-    N = 11
+    N = 8
     # N = 10
     random_charges = ChargeCollection(N)
     # random_charges.plot_charges()
 
-    hillclimber = HillClimber(random_charges)
-    hillclimber.run(iterations=10, verbose=True, animate=True, save=True)
+    # hillclimber = HillClimber(random_charges, max_stepsize=0.7)
+    # hillclimber.run(iterations=10, verbose=True, animate=True, save=True)
 
-    hillclimber.charges.plot_charges()
+    # hillclimber.charges.plot_charges()
 
-    simulated_annealing = SimulatedAnnealing(random_charges)
-    simulated_annealing.run(iterations=20000, verbose=True, animate=True, save=True)
+    simulated_annealing = SimulatedAnnealing(random_charges, max_stepsize=0.7, cooling_rate=0.1, temperature=750)
+    simulated_annealing.run(iterations=25000, verbose=True, save=True)
     simulated_annealing.charges.plot_charges()
