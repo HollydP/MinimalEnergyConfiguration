@@ -51,7 +51,7 @@ class ChargeCollection:
         return E  # because each contribution was counted twice
     
 
-    def plot_charges(self,random_charges=[]):
+    def plot_charges(self):
         """
         Plots current charge configuration.
         """
@@ -60,8 +60,11 @@ class ChargeCollection:
 
         theta = np.linspace(0, 2*np.pi, 100)
         x, y = np.cos(theta), np.sin(theta)
+
+        plt.figure(figsize=(5, 5))
         plt.plot(x, y, label='boundary')
         plt.plot(x_coords, y_coords, "ko")
+        plt.axis('equal')
         plt.show()
     
 
@@ -198,21 +201,14 @@ class SimulatedAnnealing():
         '''
         new_energy = new_configuration.get_total_energy()
         old_energy = self.energy
-
-        # Assess the probability of accepting new configuration
         delta_energy = new_energy - old_energy
-        if self.T == 0:
-            p_accept = 0
-        else:
-            p_accept = math.exp(-delta_energy / self.T)
 
         # If new configuration is better, accept it
         if  delta_energy < 0:
             self.charges = new_configuration
             self.energy = new_energy
-
         # Else, if new configuration is worse, accept it given probability    
-        elif random.random() < p_accept:
+        elif random.random() < math.exp(-delta_energy / self.T):
             self.charges = new_configuration
             self.energy = new_energy
 
@@ -261,8 +257,8 @@ class SimulatedAnnealing():
                 self.move_charge(new_configuration, charge_index=i)
                 self.check_solution(new_configuration)  # accept or reject new configuration
 
-            # Update the temperature for every 100th iteration
-            if (iteration % 100 == 0):
+            # Update the temperature for every 10th iteration
+            if (iteration % 10 == 0):
                 self.update_temperature()
 
             if save:
