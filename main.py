@@ -21,11 +21,11 @@ def run_simulated_annealing(iterations=5000, plot=False, save=False, verbose=Fal
     '''
     Runs one simulated annealing run.
     '''
-    N = 16      # = number of charges
-    c = 0.9     # = cooling rate (taken from paper)
+    N = 12      # = number of charges
+    c = 0.1     # = cooling rate (lower = faster cooling, but more iterations near zero)
 
     # Create charge collection:
-    random_charges = ChargeCollection(N-1)  # N-1 because we add a charge at (0,0) during iterations (TODO: change this)
+    random_charges = ChargeCollection(N)  # N-1 because we add a charge at (0,0) during iterations (TODO: change this)
     simulated_annealing = SimulatedAnnealing(random_charges, max_stepsize=1.0, cooling_rate=c)
     simulated_annealing.run(iterations=iterations, verbose=verbose, animate=False, save=save)
 

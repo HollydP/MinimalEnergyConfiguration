@@ -17,6 +17,7 @@ class HillClimber:
         self.energy_arr = None 
         self.T_arr = None
 
+
     def mutate_configuration(self, new_configuration, charge_index):
         """
         Change the position of a given charge.
@@ -24,6 +25,7 @@ class HillClimber:
         x_step = random.uniform(-self.max_stepsize, self.max_stepsize) 
         y_step = random.uniform(-self.max_stepsize, self.max_stepsize)
         new_configuration.change_charge_position(charge_index, x_step, y_step)
+
 
     def check_solution(self, new_configuration, iteration):
         """
@@ -35,6 +37,7 @@ class HillClimber:
         if new_energy <= old_energy:
             self.charges = new_configuration
             self.energy = new_energy 
+
 
     def run(self, iterations, verbose=False, animate=False, save=False):
         """
@@ -90,10 +93,11 @@ class HillClimber:
         # save to csv
         if save:
             T0 = self.T0 if self.T else "no_temp"
-            self.save_results(title=f"{iteration + 1}_N_{self.charges.N}_iters_max_step_{self.max_stepsize}_T0_{T0}_cooling_{self.cooling_schedule}")
+            self.save_results(title=f"{iteration + 1}_N_{self.charges.N}_iters_max_step_{self.max_stepsize}_T0_{T0}_cooling_{self.cooling_rate}")
 
         # return best solution found
         return self.charges     
+
 
     def save_results(self, title):
         """
@@ -105,40 +109,58 @@ class HillClimber:
 
 
 class SimulatedAnnealing(HillClimber):
-    """
+
+    '''
     The SimulatedAnnealing class that changes position of random charge.
     Each improvement or equivalent solution is kept for the next iteration.
     Sometimes accepts solutions that are \'worse\', depending on the current temperature.
 
     Most of the functions are similar to those of the HillClimber class, which is why
     we use that as a parent class.
-    """
-    def __init__(self, charges:ChargeCollection, max_stepsize, cooling_rate = 1e-3 ,temperature=5000):
+    '''
+    
+    def __init__(self, charges:ChargeCollection, max_stepsize, cooling_rate=1e-3, temperature=5000):
+        '''
+        Description
+        -----------
+        Initialize the SimulatedAnnealing class.
+
+        Parameters
+        ----------
+        charges : `ChargeCollection`
+            The collection of charges to be used.
+        max_stepsize : `float`
+            The maximum step size for the charges.
+        cooling_rate : `float`
+            The cooling rate for the temperature.
+        '''
         # Use the init of the Hillclimber class
-        super().__init__(charges,max_stepsize)
+        super().__init__(charges, max_stepsize)
 
         # Starting temperature and current temperature
         self.T0 = temperature
         self.T = temperature
-        self.cooling_schedule = (1-cooling_rate)
+        self.cooling_rate = cooling_rate
+
 
     def update_temperature(self,linear=False):
-        """
+        '''
         This function implements a exponential cooling scheme.
         Same one used in the article on canvas.
-        """
-         #- (self.T0 / self.iterations / 1100)
+        '''
+        #- (self.T0 / self.iterations / 1100)
         if linear==True:
-             self.T = self.T - (self.T0*100  / (self.iterations+1))
+            self.T = self.T - (self.T0*100  / (self.iterations+1))
         else:
-            self.T = self.T * self.cooling_schedule
+            self.T = self.T * self.cooling_rate
+
 
     def check_solution(self, new_configuration:ChargeCollection, iteration):
-        """
+        '''
         Checks and accepts better solutions than the current solution.
         Sometimes accepts solutions that are worse, depending on the current
         temperature.
-        """
+        '''
         new_energy = new_configuration.get_total_energy()
         old_energy = self.energy
 
