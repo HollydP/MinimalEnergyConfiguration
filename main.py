@@ -12,10 +12,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from charge_collection import ChargeCollection
-from HillClimber import SimulatedAnnealing
-from HillClimber import HillClimber
+# from charge_collection import ChargeCollection
+# from HillClimber import SimulatedAnnealing
+# from HillClimber import HillClimber
 
+from classes import ChargeCollection, SimulatedAnnealing
 
 def run_simulated_annealing(iterations=5000, plot=False, save=False, verbose=False):
     '''

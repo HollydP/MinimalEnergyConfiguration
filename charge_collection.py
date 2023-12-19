@@ -69,7 +69,7 @@ class ChargeCollection:
         new_y = self.charges[charge][1] + y_step 
 
         # place on border if step pushes charge out of bounds
-        # TODO: this doesn't seem correct
+        # TODO: does this work in combination with the rejection of out of bounds configurations in get_total_energy()?
         while np.sqrt(new_x**2 + new_y**2) > 1:
             new_x = new_x - 0.005 if new_x > 0 else new_x + 0.005
             new_y = new_y - 0.005 if new_y > 0 else new_y + 0.005
@@ -85,6 +85,7 @@ class ChargeCollection:
             if math.dist([0, 0], coord) > 1:
                 return False
         return True
+
 
 if __name__=="__main__":
     N = 3
