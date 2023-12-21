@@ -119,7 +119,7 @@ class SimulatedAnnealing():
     depends on the current temperature.
     '''
     
-    def __init__(self, charges:ChargeCollection, max_stepsize, cooling_rate=1e-3, init_temperature=5000):
+    def __init__(self, charges:ChargeCollection, max_stepsize, cooling_rate=1e-3,chain_length = 10, init_temperature=5000):
         '''
         Description
         -----------
@@ -143,10 +143,13 @@ class SimulatedAnnealing():
         
         # Initialize parameters
         self.charges = copy.deepcopy(charges)
+        self.max_stepsize = max_stepsize
         self.cooling_rate = cooling_rate
+        self.chain_length = chain_length
+
         self.energy = charges.get_total_energy()
         self.energy_arr = None 
-        self.max_stepsize = max_stepsize
+        
         self.T_arr = None
         self.T0 = init_temperature
         self.T = init_temperature
@@ -258,7 +261,7 @@ class SimulatedAnnealing():
                 self.check_solution(new_configuration)  # accept or reject new configuration
 
             # Update the temperature for every 10th iteration
-            if (iteration % 10 == 0):
+            if (iteration % self.chain_length == 0):
                 self.update_temperature()
 
             if save:

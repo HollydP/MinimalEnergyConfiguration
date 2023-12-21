@@ -20,6 +20,7 @@ def main():
     simulated_annealing = SimulatedAnnealing(
         charges=ChargeCollection(N), 
         max_stepsize=0.5, 
+        chain_length = 10,
         cooling_rate=c,
         init_temperature=100
     )
