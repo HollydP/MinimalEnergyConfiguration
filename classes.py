@@ -31,7 +31,7 @@ class ChargeCollection:
         return [list(coords) for coords in zip(x, y)]
     
     
-    def get_total_energy(self):
+    def get_total_energy_new(self):
         '''
         Returns the total energy of the current charge configuration.
         '''
@@ -50,6 +50,22 @@ class ChargeCollection:
         
         return E  # because each contribution was counted twice
     
+
+    def get_total_energy(self):
+        """
+        Returns the total energy of the charge configuration.
+        """
+        # loop over all charge pairs
+        E = 0
+        for charge in self.charges:
+            for other_charge in self.charges:
+                r = math.dist(charge, other_charge) 
+                E += 1/r if r != 0 else 0
+        # if particle out of bounds sure it is not accepted
+        if not self.is_solution():
+            return sys.maxsize
+        return E / 2 # because each contribution was counted twice
+
 
     def plot_charges(self):
         """
@@ -152,6 +168,44 @@ class SimulatedAnnealing():
         self.T = init_temperature
 
 
+    def rank_charges(self, neighbor):
+        '''
+        Ranks the charges per neighboring procedure.
+
+        Parameters
+        ----------
+        'random' : returns random order of charges
+        'iterative' : returns charges in order of index
+        'by_distance' : returns charges in order of distance to origin
+        'by_force' : returns charges in order of force on charge
+        '''
+        if neighbor == 'random':
+            charge_indices = np.random.choice(self.charges.N, size=self.charges.N, replace=False)
+        
+        elif neighbor == 'iterative':
+            charge_indices = range(self.charges.N)
+        
+        elif neighbor == 'by_distance':
+            charge_indices = np.argsort([math.dist([0, 0], coord) for coord in self.charges.charges])
+        
+        elif neighbor == 'by_force':
+            # check force on each charge
+            tot_F_ij = np.zeros((self.charges.N, 2))
+            norms_F_ij = np.zeros(self.charges.N)
+            for i in range(self.charges.N):
+                for j in range(self.charges.N):
+                    if i != j:
+                        r_ij = np.array(self.charges.charges[i]) - np.array(self.charges.charges[j])
+                        F_ij = r_ij / np.linalg.norm(r_ij)**3
+                        tot_F_ij[i] += F_ij
+                norms_F_ij[i] = np.linalg.norm(tot_F_ij[i])
+            charge_indices = np.argsort(norms_F_ij)
+        
+        else:
+            raise Exception("Invalid neighbor selection method")
+        
+        return charge_indices
+
     def move_charge(self, new_configuration:ChargeCollection, charge_index):
         '''
         Moves a charge at random.
@@ -222,7 +276,7 @@ class SimulatedAnnealing():
         print(f"\nOutput saved to {title}")
 
 
-    def run(self, iterations, verbose=False, animate=False, save=False):
+    def run(self, iterations, neighbor='iterative', verbose=False, animate=False, save=False):
         '''
         Description
         -----------
@@ -232,6 +286,8 @@ class SimulatedAnnealing():
         ----------
         iterations : `int`
             The number of iterations to run the simulation for.
+        neighbor : `str`
+            The neighbor selection method to use. Options are 'random', 'iterative', and 'by_force'.
         verbose : `bool`
             Whether to print the current iteration and energy.
         animate : `bool`
@@ -251,8 +307,9 @@ class SimulatedAnnealing():
             if verbose:
                 print(f'Iteration {iteration + 1}/{iterations}, current energy: {self.energy}, T: {self.T}                ', end='\r')
             
-            # Attempt N steps, one per charge TODO: other ways of picking charges?
-            for i in range(self.charges.N):
+            # Attempt N steps, one per charge TODO: other ways of picking charges?            
+            charge_indices = self.rank_charges(neighbor=neighbor)
+            for i in charge_indices:
                 new_configuration = copy.deepcopy(self.charges)
                 self.move_charge(new_configuration, charge_index=i)
                 self.check_solution(new_configuration)  # accept or reject new configuration

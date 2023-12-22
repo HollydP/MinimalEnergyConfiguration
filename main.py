@@ -14,7 +14,7 @@ def main():
     '''
     iterations = 10_000
 
-    N = 12      # = number of charges
+    N = 11      # = number of charges
     c = 0.9     # = cooling rate (lower = faster cooling, but more iterations near zero)
 
     simulated_annealing = SimulatedAnnealing(
@@ -25,7 +25,8 @@ def main():
     )
     
     simulated_annealing.run(
-        iterations=iterations, 
+        iterations=iterations,
+        neighbor='random', 
         verbose=True, 
         animate=False, 
         save=False
