@@ -187,6 +187,7 @@ class SimulatedAnnealing():
         
         elif neighbor == 'by_distance':
             charge_indices = np.argsort([math.dist([0, 0], coord) for coord in self.charges.charges])
+            charge_indices = charge_indices[::-1] # reverse order
         
         elif neighbor == 'by_force':
             # check force on each charge
@@ -314,8 +315,8 @@ class SimulatedAnnealing():
                 self.move_charge(new_configuration, charge_index=i)
                 self.check_solution(new_configuration)  # accept or reject new configuration
 
-            # Update the temperature for every 10th iteration
-            if (iteration % 10 == 0):
+            # Update the temperature for every 100th iteration
+            if (iteration % 100 == 0):
                 self.update_temperature()
 
             if save:
