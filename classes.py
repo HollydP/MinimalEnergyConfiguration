@@ -240,7 +240,7 @@ class SimulatedAnnealing():
         if not linear:
             self.T = self.T * self.cooling_rate
         else:
-            self.T = self.T - (self.T0*100  / (self.iterations+1))
+            self.T = self.T - (self.T0*self.chain_length  / (self.iterations+1))
 
 
     def check_solution(self, new_configuration:ChargeCollection):
@@ -334,6 +334,6 @@ class SimulatedAnnealing():
         plt.ioff() if animate else None 
 
         if save:
-            self.save_results(title=f"{iteration + 1}_N_{self.charges.N}_iters_max_step_{self.max_stepsize}_T0_{self.T0}_cooling_{self.cooling_rate}")
+            self.save_results(title=f"{iteration + 1}_N_{self.charges.N}_iters_max_step_{self.max_stepsize}_T0_{self.T0}_cooling_{self.cooling_rate}_chain_{self.chain_length}")
 
         return self.charges
